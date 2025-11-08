@@ -196,7 +196,7 @@
     // Fetch list of movies (search results)
     async function fetchSearchResults(query) {
       try {
-        const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}`);
+        const res = await fetch(`/api/omdb?query=${query}`);
         const data = await res.json();
         return data.Response === "True" ? data : null;
       } catch (err) {

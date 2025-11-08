@@ -5,11 +5,7 @@
   <title>🎬 Movie Explorer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * {
-      box-sizing: border-box;
-      transition: 0.2s ease;
-    }
-
+    * { box-sizing: border-box; transition: 0.2s ease; }
     body {
       margin: 0;
       background-color: #0f0f0f;
@@ -24,7 +20,7 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
     }
 
     header h1 {
@@ -60,9 +56,7 @@
       font-size: 1rem;
     }
 
-    .search-bar button:hover {
-      background: #ff2222;
-    }
+    .search-bar button:hover { background: #ff2222; }
 
     .recent-searches {
       margin-top: 10px;
@@ -79,17 +73,11 @@
       font-size: 0.9rem;
     }
 
-    .recent-searches span:hover {
-      background: #ff4444;
-    }
+    .recent-searches span:hover { background: #ff4444; }
 
-    main {
-      padding: 10px;
-    }
+    main { padding: 10px; }
 
-    section {
-      margin-bottom: 30px;
-    }
+    section { margin-bottom: 30px; }
 
     section h2 {
       text-align: center;
@@ -110,14 +98,12 @@
       border-radius: 10px;
       padding: 10px;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
       text-align: center;
       transition: transform 0.2s ease;
     }
 
-    .movie-card:hover {
-      transform: scale(1.05);
-    }
+    .movie-card:hover { transform: scale(1.05); }
 
     .movie-card img {
       width: 100%;
@@ -126,10 +112,7 @@
       border-radius: 8px;
     }
 
-    .movie-card h3 {
-      margin: 10px 0 5px;
-      font-size: 1.1rem;
-    }
+    .movie-card h3 { margin: 10px 0 5px; font-size: 1.1rem; }
 
     .movie-card p {
       margin: 3px 0;
@@ -145,59 +128,21 @@
       color: #aaa;
     }
 
-    /* RESPONSIVE ADJUSTMENTS */
     @media (max-width: 768px) {
-      header h1 {
-        font-size: 1.5rem;
-      }
-
-      .search-bar input {
-        width: 180px;
-        font-size: 0.9rem;
-      }
-
-      .search-bar button {
-        font-size: 0.9rem;
-        padding: 8px 15px;
-      }
-
-      .movie-card img {
-        height: 250px;
-      }
-
-      section h2 {
-        font-size: 1.3rem;
-      }
+      header h1 { font-size: 1.5rem; }
+      .search-bar input { width: 180px; font-size: 0.9rem; }
+      .search-bar button { font-size: 0.9rem; padding: 8px 15px; }
+      .movie-card img { height: 250px; }
+      section h2 { font-size: 1.3rem; }
     }
 
     @media (max-width: 480px) {
-      header {
-        padding: 10px;
-      }
-
-      header h1 {
-        font-size: 1.3rem;
-      }
-
-      .search-bar {
-        flex-direction: column;
-      }
-
-      .search-bar input {
-        width: 90%;
-      }
-
-      .movie-card {
-        width: 100%;
-      }
-
-      .movie-card img {
-        height: 230px;
-      }
-
-      section h2 {
-        font-size: 1.1rem;
-      }
+      header { padding: 10px; }
+      header h1 { font-size: 1.3rem; }
+      .search-bar { flex-direction: column; }
+      .search-bar input { width: 90%; }
+      .movie-card img { height: 230px; }
+      section h2 { font-size: 1.1rem; }
     }
   </style>
 </head>
@@ -228,34 +173,51 @@
   </footer>
 
   <script>
-    const apiKey = "41f174a7"; // Replace with your OMDb API key
+    const apiKey = "41f174a7";
     let history = [];
 
+    // Load trending movies on homepage
+    window.onload = () => {
+      fetchTrendingMovies();
+    };
+
+    // Search movies
     document.getElementById("searchBtn").addEventListener("click", async () => {
       const query = document.getElementById("searchInput").value.trim();
       if (!query) return alert("Please enter a movie name!");
-
-      const movie = await fetchMovieDetails(query);
-      if (movie) {
-        displayMovies([movie], "movieContainer");
-        addToHistory(movie);
-        fetchRecommendations(movie);
+      const data = await fetchSearchResults(query);
+      if (data) {
+        displayMovies(data.Search, "movieContainer");
       } else {
-        document.getElementById("movieContainer").innerHTML = `<p>No movie found 😢</p>`;
+        document.getElementById("movieContainer").innerHTML = `<p>No movies found 😢</p>`;
       }
     });
 
+    // Fetch list of movies (search results)
+    async function fetchSearchResults(query) {
+      try {
+        const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}`);
+        const data = await res.json();
+        return data.Response === "True" ? data : null;
+      } catch (err) {
+        console.error("Error fetching:", err);
+        return null;
+      }
+    }
+
+    // Fetch single movie details
     async function fetchMovieDetails(title) {
       try {
         const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${apiKey}`);
         const data = await res.json();
         return data.Response === "True" ? data : null;
       } catch (error) {
-        console.error("Error fetching movie:", error);
+        console.error("Error fetching details:", error);
         return null;
       }
     }
 
+    // Display movie cards
     function displayMovies(movies, containerId) {
       const container = document.getElementById(containerId);
       container.innerHTML = "";
@@ -266,16 +228,17 @@
           <img src="${movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/200x300?text=No+Image"}" alt="${movie.Title}">
           <h3>${movie.Title}</h3>
           <p>${movie.Year}</p>
-          <p>${movie.Genre || ""}</p>
         `;
-        div.addEventListener("click", () => {
-          addToHistory(movie);
-          fetchRecommendations(movie);
+        div.addEventListener("click", async () => {
+          const details = await fetchMovieDetails(movie.Title);
+          addToHistory(details);
+          fetchRecommendations(details);
         });
         container.appendChild(div);
       });
     }
 
+    // Add to recent search history
     function addToHistory(movie) {
       if (!history.find(m => m.Title === movie.Title)) {
         history.unshift(movie);
@@ -284,6 +247,7 @@
       updateRecentSearches();
     }
 
+    // Show clickable search history tags
     function updateRecentSearches() {
       const recentDiv = document.getElementById("recentSearches");
       recentDiv.innerHTML = "";
@@ -299,6 +263,7 @@
       });
     }
 
+    // Fetch similar movies based on genre
     async function fetchRecommendations(movie) {
       if (!movie.Genre) return;
       const mainGenre = movie.Genre.split(",")[0].trim();
@@ -313,6 +278,17 @@
         }
       } catch (error) {
         console.error("Error fetching recommendations:", error);
+      }
+    }
+
+    // Fetch trending movies for homepage
+    async function fetchTrendingMovies() {
+      const trendingKeywords = ["Avengers", "Batman", "Harry Potter", "Spider", "Mission Impossible"];
+      const random = trendingKeywords[Math.floor(Math.random() * trendingKeywords.length)];
+      const res = await fetch(`https://www.omdbapi.com/?s=${random}&apikey=${apiKey}`);
+      const data = await res.json();
+      if (data.Response === "True") {
+        displayMovies(data.Search.slice(0, 8), "recommendContainer");
       }
     }
   </script>
